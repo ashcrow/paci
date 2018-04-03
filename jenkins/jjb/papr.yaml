@@ -123,8 +123,8 @@
 
 - project:
     name: papr-triggers
-    paci-owner: projectatomic
-    paci-branch: master
+    paci-owner: jlebon
+    paci-branch: rename
     white-list: ""
     jobs:
       - papr-jobs:
