@@ -73,7 +73,7 @@ def generate_papr_pod(args):
                     "image": "172.30.1.1:5000/projectatomic-ci/papr",
                     "imagePullPolicy": "Always",
                     "args": ["--debug", "runtest", "--conf",
-                             "/etc/papr.conf", "--repo", args.repo],
+                             "/etc/papr/config", "--repo", args.repo],
                     # XXX: pvc for git checkout caches
                     # XXX: mount site.yaml configmap
                     "volumeMounts": [
@@ -81,18 +81,28 @@ def generate_papr_pod(args):
                             "name": "github-token-mount",
                             "mountPath": "/etc/github-token",
                             "readOnly": True
+                        },
+                        {
+                            "name": "config-mount",
+                            "mountPath": "/etc/papr"
                         }
                     ]
                 }
             ],
             "volumes": [
                 {
-                  "name": "github-token-mount",
-                  "secret": {
-                    # XXX: this is from the template; probably should just
-                      # require the secret to have that exact name
-                    "secretName": "github-token"
+                    "name": "github-token-mount",
+                    "secret": {
+                        # XXX: this is from the template; probably should just
+                          # require the secret to have that exact name
+                        "secretName": "github-token"
                   }
+                },
+                {
+                    "name": "config-mount",
+                    "configMap": {
+                        "name": "papr-config"
+                    }
                 }
             ]
         }

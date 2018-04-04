@@ -144,6 +144,16 @@ objects:
   - kind: ServiceAccount
     name: papr
 - apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: papr-config
+  data:
+    config: |
+      publisher:
+        type: local
+        config:
+          rootdir: results
+- apiVersion: v1
   kind: Route
   metadata:
     annotations:
