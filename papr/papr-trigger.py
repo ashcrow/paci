@@ -72,8 +72,21 @@ def generate_papr_pod(args):
                     "name": "papr",
                     "image": "172.30.1.1:5000/projectatomic-ci/papr",
                     "imagePullPolicy": "Always",
-                    "args": ["--debug", "runtest", "--conf",
+                    # hack for faster dev
+                    "securityContext": {
+                        "runAsUser": 0
+                    },
+                    "command": ["sh", "-c", '''
+                                cd /var/tmp && git clone -b ocp \
+                                    -c user.name=papr \
+                                    -c user.email=papr@example.com \
+                                    https://github.com/projectatomic/papr && \
+                                    pip3 install -I /var/tmp/papr && papr "$@"
+                                '''],
+                    "args": ["papr", "--debug", "runtest", "--conf",
                              "/etc/papr/config", "--repo", args.repo],
+                    #"args": ["--debug", "runtest", "--conf",
+                    #         "/etc/papr/config", "--repo", args.repo],
                     # XXX: pvc for git checkout caches
                     # XXX: mount site.yaml configmap
                     "volumeMounts": [
