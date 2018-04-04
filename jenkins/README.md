@@ -151,6 +151,12 @@ working OpenShift cluster. See the PAPR
 [instructions](https://github.com/projectatomic/papr/blob/ocp/docs/RUNNING.md)
 for more details on how to get started.
 
+The `papr` service account needs to have a membership in an SCC with `RunAsAny`,
+so that it can run test containers as root, much like Docker. In the
+`oc cluster up` case, this can be done simply by adding the papr service account
+to the `anyuid` SCC. Otherwise, you'll need to ask a cluster administrator to do
+this for you.
+
 To be able to trigger PAPR tests from GHPRB jobs in Jenkins, you simply need to
 build the PAPR image:
 
