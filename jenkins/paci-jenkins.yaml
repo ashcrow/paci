@@ -149,6 +149,8 @@ objects:
     name: papr-config
   data:
     config: |
+      github:
+        auth-from-env: true
       publisher:
         type: local
         config:

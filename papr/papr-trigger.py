@@ -88,13 +88,22 @@ def generate_papr_pod(args):
                     #"args": ["--debug", "runtest", "--conf",
                     #         "/etc/papr/config", "--repo", args.repo],
                     # XXX: pvc for git checkout caches
-                    # XXX: mount site.yaml configmap
-                    "volumeMounts": [
+                    "env": [
                         {
-                            "name": "github-token-mount",
-                            "mountPath": "/etc/github-token",
-                            "readOnly": True
-                        },
+                            "name": "GITHUB_TOKEN",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    # XXX: this is from the template; probably
+                                    # should just require the secret to have
+                                    # that exact name
+                                    "name": "github-token",
+                                    "key": "token",
+                                    "optional": False
+                                }
+                            }
+                        }
+                    ],
+                    "volumeMounts": [
                         {
                             "name": "config-mount",
                             "mountPath": "/etc/papr"
@@ -103,14 +112,6 @@ def generate_papr_pod(args):
                 }
             ],
             "volumes": [
-                {
-                    "name": "github-token-mount",
-                    "secret": {
-                        # XXX: this is from the template; probably should just
-                          # require the secret to have that exact name
-                        "secretName": "github-token"
-                  }
-                },
                 {
                     "name": "config-mount",
                     "configMap": {
