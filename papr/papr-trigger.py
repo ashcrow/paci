@@ -24,6 +24,9 @@ import tempfile
 import subprocess
 
 
+# XXX: Need to figure out GC strategy. Another svc perhaps?
+
+
 def main():
 
     args = parse_args()
@@ -94,6 +97,26 @@ def generate_papr_pod(args):
                                 "secretKeyRef": {
                                     "name": "github-token",
                                     "key": "token",
+                                    "optional": False
+                                }
+                            }
+                        },
+                        {
+                            "name": "AWS_ACCESS_KEY_ID",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "name": "aws-access-key",
+                                    "key": "id",
+                                    "optional": False
+                                }
+                            }
+                        },
+                        {
+                            "name": "AWS_SECRET_ACCESS_KEY",
+                            "valueFrom": {
+                                "secretKeyRef": {
+                                    "name": "aws-access-key",
+                                    "key": "secret",
                                     "optional": False
                                 }
                             }

@@ -152,9 +152,11 @@ objects:
       github:
         auth-from-env: true
       publisher:
-        type: local
+        type: s3
         config:
-          rootdir: results
+          auth-from-env: true
+          bucket: aos-ci
+          rootdir: ghprb
 - apiVersion: v1
   kind: Route
   metadata:
