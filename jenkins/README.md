@@ -38,7 +38,7 @@ Assuming you already have a cluster set up and running (e.g. `oc cluster up`):
 
 ```
 $ oc new-project projectatomic-ci
-$ echo "$GITHUB_TOKEN" > mytoken
+$ echo -n "$GITHUB_TOKEN" > mytoken
 $ oc secrets new github-token token=mytoken
 $ oc new-app --file paci-jenkins.yaml
 ```
