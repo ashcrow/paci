@@ -19,7 +19,6 @@ from __future__ import print_function
 import os
 import sys
 import json
-import uuid
 import argparse
 import tempfile
 import subprocess
@@ -50,8 +49,6 @@ def parse_args():
 def generate_papr_pod(args):
     repo_name = args.repo[args.repo.index('/')+1:]
     target_name = args.branch if args.branch else args.pull
-    uuid_name = uuid.uuid4().hex[:6] # XXX: actually check for collision
-    pod_name = "papr-%s-%s-%s" % (repo_name, target_name, uuid_name)
     # XXX: Migrate to Jobs, which have nicer semantics. For now, we're stuck
     # with kube v1.6, which knows jobs, but doesn't support "backoffLimit".
     # https://github.com/kubernetes/kubernetes/issues/30243
@@ -59,7 +56,7 @@ def generate_papr_pod(args):
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
-            "name": pod_name,
+            "generateName": "papr-%s-%s-" % (repo_name, target_name),
             "labels": {
                 "app": "papr"
             }
@@ -72,30 +69,29 @@ def generate_papr_pod(args):
                     "name": "papr",
                     "image": "172.30.1.1:5000/projectatomic-ci/papr",
                     "imagePullPolicy": "Always",
-                    # hack for faster dev
+                    # XXX: hack for faster dev
                     "securityContext": {
                         "runAsUser": 0
                     },
                     "command": ["sh", "-c", '''
-                                cd /var/tmp && git clone -b ocp \
+                                cd /var/tmp
+                                git clone -b ocp \
                                     -c user.name=papr \
                                     -c user.email=papr@example.com \
-                                    https://github.com/projectatomic/papr && \
-                                    pip3 install -I /var/tmp/papr && papr "$@"
+                                    https://github.com/projectatomic/papr
+                                pip3 install -I /var/tmp/papr
+                                papr "$@"
                                 '''],
                     "args": ["papr", "--debug", "runtest", "--conf",
                              "/etc/papr/config", "--repo", args.repo],
                     #"args": ["--debug", "runtest", "--conf",
                     #         "/etc/papr/config", "--repo", args.repo],
-                    # XXX: pvc for git checkout caches
+                    # XXX: pvc for git checkout caches (but need to add locking)
                     "env": [
                         {
                             "name": "GITHUB_TOKEN",
                             "valueFrom": {
                                 "secretKeyRef": {
-                                    # XXX: this is from the template; probably
-                                    # should just require the secret to have
-                                    # that exact name
                                     "name": "github-token",
                                     "key": "token",
                                     "optional": False
@@ -148,8 +144,7 @@ def create_papr_pod(pod):
     with tempfile.TemporaryFile() as tmpf:
         tmpf.write(json.dumps(pod).encode('utf-8'))
         tmpf.seek(0)
-        subprocess.check_output(["oc", "create", "-f", "-"], stdin=tmpf)
-    print(pod["metadata"]["name"])
+        subprocess.check_call(["oc", "create", "-f", "-"], stdin=tmpf)
 
 
 if __name__ == '__main__':
